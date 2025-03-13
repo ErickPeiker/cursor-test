@@ -1,4 +1,11 @@
-from agents import Agent, Runner
+from agents import Agent, Runner, WebSearchTool
+
+fallback_agent = Agent(
+    name="fallback_agent",
+    handoff_description="Agente de fallback para perguntas escolares que não se encaixam nas categorias existentes.",
+    instructions="Você lida com perguntas que não se encaixam nas categorias existentes nas matérias de escola primária. Solicite ao usuário para reformular a pergunta e reforce quais são as categorias disponíveis.",
+    model="o3-mini",
+)
 
 history_tutor_agent = Agent(
     name="professor_historia",
@@ -14,12 +21,20 @@ math_tutor_agent = Agent(
     model="o3-mini",
 )
 
+web_agent = Agent(
+    name="web_agent",
+    instructions="Você é um agente que busca informações na web.",
+    tools=[
+        WebSearchTool(),
+    ],
+)
+
 triage_agent = Agent(
     name="triagem",
     instructions="Você é o agente de triagem, que determina qual agente deve ser usado com base na pergunta do usuário.",
-    handoffs=[history_tutor_agent, math_tutor_agent],
+    handoffs=[fallback_agent, history_tutor_agent, math_tutor_agent, web_agent],
     model="o3-mini",
 )
 
-result = Runner.run_sync(triage_agent, "Qual a principal motivação da primeira e da segunda geurra mundial?")
+result = Runner.run_sync(triage_agent, "Quanto custa uma bolsa?")
 print(result.final_output)
